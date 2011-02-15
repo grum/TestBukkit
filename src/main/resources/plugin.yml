@@ -1,0 +1,7 @@
+name: TestBukkit
+main: nl.grum.bukkit.dev.TestBukkit
+version: 0.1
+commands:
+  test:
+    description: Test Commands
+    usage: /<command>
