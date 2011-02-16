@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.server.EntityItem;
 import net.minecraft.server.ItemStack;
 import net.minecraft.server.Packet15Place;
 
@@ -13,7 +14,11 @@ import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.entity.CraftItem;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.ItemDrop;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.event.block.*;
@@ -106,12 +111,33 @@ public class TestBukkit extends JavaPlugin {
                 Block block = event.getBlock();
                 String fromBlock = String.format("Block{coords=[%d,%d,%d],type=%s}", block.getX(), block.getY(), block.getZ(), event.getType());
                 return String.format("BlockFromTo{from=%s,to=%s}", fromBlock, myToString(event.getToBlock()));
+            } else if (object instanceof BlockPlaceEvent) {
+                BlockPlaceEvent event = (BlockPlaceEvent) object;
+                return String.format("BlockPlace{player=%s,block=%s,old=%s}", myToString(event.getPlayer()), myToString(event.getBlock()), myToString(event.getBlockReplacedState().getType()));
+            } else if (object instanceof BlockCanBuildEvent) {
+                BlockCanBuildEvent event = (BlockCanBuildEvent) object;
+                return String.format("BlockCanBuild{block=%s,new-material=%s}", myToString(event.getBlock()), myToString(event.getMaterial()));
+            } else if (object instanceof EntityDeathEvent) {
+                EntityDeathEvent event = (EntityDeathEvent) object;
+                return String.format("EntityDeath{entity=%s,drops=%s}", myToString(event.getEntity()), myToString(event.getDrops()));
+            } else if (object instanceof EntityCombustEvent) {
+                EntityCombustEvent event = (EntityCombustEvent) object;
+                return String.format("EntityCombust{entity=%s}", myToString(event.getEntity()));
+            } else if (object instanceof EntityTargetEvent) {
+                EntityTargetEvent event = (EntityTargetEvent) object;
+                return String.format("EntityTarget{entity=%s,target=%d,reason=%s}", myToString(event.getEntity()), myToString(event.getTarget()), event.getReason());
+            } else if (object instanceof EntityDamageEvent) {
+                EntityDamageEvent event = (EntityDamageEvent) object;
+                return String.format("EntityDamage{entity=%s,damage=%d,cause=%s}", myToString(event.getEntity()), event.getDamage(), event.getCause());
             } else if (object instanceof BlockRightClickEvent) {
                 BlockRightClickEvent event = (BlockRightClickEvent) object;
                 return String.format("BlockRightClick{player=%s,block=%s,face=%s}", myToString(event.getPlayer()), myToString(event.getBlock()), event.getDirection());
+            } else if (object instanceof PlayerPickupItemEvent) {
+                PlayerPickupItemEvent event = (PlayerPickupItemEvent) object;
+                return String.format("PlayerPickupItem{player=%s,item=%s}", myToString(event.getPlayer()), myToString(event.getItem()));
             } else if (object instanceof PlayerDropItemEvent) {
                 PlayerDropItemEvent event = (PlayerDropItemEvent) object;
-                return String.format("PlayerDropItem{player=%s,block=%s,level=%s}", myToString(event.getPlayer()), myToString(event.getItemDrop()));
+                return String.format("PlayerDropItem{player=%s,item=%s}", myToString(event.getPlayer()), myToString(event.getItemDrop()));
             } else if (object instanceof BlockDamageEvent) {
                 BlockDamageEvent event = (BlockDamageEvent) object;
                 return String.format("BlockDamage{player=%s,block=%s,level=%s}", myToString(event.getPlayer()), myToString(event.getBlock()), event.getDamageLevel());
@@ -124,6 +150,12 @@ public class TestBukkit extends JavaPlugin {
                 Location from = event.getFrom();
                 return String.format("PlayerMove{from=[%.3f,%.3f,%.3f],to=[%.3f,%.3f,%.3f]}", from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
             }
+        } else if (object instanceof ItemDrop) {
+            ItemDrop item = (ItemDrop) object;
+            return String.format("ItemDrop{name=%s}", myToString( item.getItemStack() ));
+        } else if (object instanceof CraftItem) {
+            CraftItem item = (CraftItem) object;
+            return String.format("Item{name=%s}", myToString( new CraftItemStack( ((EntityItem)item.getHandle()).a)));
         } else if (object instanceof Player) {
             Player player = (Player) object;
             return String.format("Player{name=%s}", player.getName());
