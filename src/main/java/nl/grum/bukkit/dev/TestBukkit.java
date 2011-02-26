@@ -18,7 +18,6 @@ import org.bukkit.craftbukkit.entity.CraftItem;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.ItemDrop;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.event.block.*;
@@ -38,11 +37,6 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Grum
  */
 public class TestBukkit extends JavaPlugin {
-
-    public TestBukkit(PluginLoader pluginLoader, Server instance, PluginDescriptionFile desc, File folder, File plugin, ClassLoader cLoader) {
-        super(pluginLoader, instance, desc, folder, plugin, cLoader);
-    }
-
     public void onEnable() {
         registerEvents();
     }
@@ -58,10 +52,10 @@ public class TestBukkit extends JavaPlugin {
         String commandName = command.getName().toLowerCase();
 
         if (commandName.equals("test")) {
-            
+
             // Block Test
             PluginManager pm = getServer().getPluginManager();
-            
+
             int x = loc.getBlockX() + 1;
             int y = loc.getBlockY();
             int z = loc.getBlockZ();
@@ -102,6 +96,7 @@ public class TestBukkit extends JavaPlugin {
     }
 
     public static String myToString(Object object) {
+        if (object == null) return "null";
         if (object instanceof Event) {
             if (object instanceof BlockPhysicsEvent) {
                 BlockPhysicsEvent event = (BlockPhysicsEvent) object;
@@ -135,6 +130,9 @@ public class TestBukkit extends JavaPlugin {
             } else if (object instanceof PlayerPickupItemEvent) {
                 PlayerPickupItemEvent event = (PlayerPickupItemEvent) object;
                 return String.format("PlayerPickupItem{player=%s,item=%s}", myToString(event.getPlayer()), myToString(event.getItem()));
+            } else if (object instanceof PlayerItemEvent) {
+                PlayerItemEvent event = (PlayerItemEvent) object;
+                return String.format("PlayerItem{player=%s,block=%s,face=%s}", myToString(event.getPlayer()), myToString(event.getBlockClicked()), myToString(event.getBlockFace()));
             } else if (object instanceof PlayerDropItemEvent) {
                 PlayerDropItemEvent event = (PlayerDropItemEvent) object;
                 return String.format("PlayerDropItem{player=%s,item=%s}", myToString(event.getPlayer()), myToString(event.getItemDrop()));
@@ -150,9 +148,6 @@ public class TestBukkit extends JavaPlugin {
                 Location from = event.getFrom();
                 return String.format("PlayerMove{from=[%.3f,%.3f,%.3f],to=[%.3f,%.3f,%.3f]}", from.getX(), from.getY(), from.getZ(), to.getX(), to.getY(), to.getZ());
             }
-        } else if (object instanceof ItemDrop) {
-            ItemDrop item = (ItemDrop) object;
-            return String.format("ItemDrop{name=%s}", myToString( item.getItemStack() ));
         } else if (object instanceof CraftItem) {
             CraftItem item = (CraftItem) object;
             return String.format("Item{name=%s}", myToString( new CraftItemStack( ((EntityItem)item.getHandle()).a)));
@@ -201,13 +196,13 @@ public class TestBukkit extends JavaPlugin {
         pm.registerEvent( Event.Type.PLAYER_PICKUP_ITEM, player, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.PLAYER_TOGGLE_SNEAK, player, Event.Priority.Monitor, this);
 
-        pm.registerEvent( Event.Type.BLOCK_PHYSICS, block, Event.Priority.Monitor, this);
+        //pm.registerEvent( Event.Type.BLOCK_PHYSICS, block, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.BLOCK_CANBUILD, block, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.BLOCK_RIGHTCLICKED, block, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.BLOCK_PLACED, block, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.BLOCK_DAMAGED, block, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.BLOCK_INTERACT, block, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.BLOCK_FLOW, block, Event.Priority.Monitor, this);
+        //pm.registerEvent( Event.Type.BLOCK_FLOW, block, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.LEAVES_DECAY, block, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.SIGN_CHANGE, block, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.BLOCK_IGNITE, block, Event.Priority.Monitor, this);
@@ -224,9 +219,6 @@ public class TestBukkit extends JavaPlugin {
         pm.registerEvent( Event.Type.WORLD_SAVED, world, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.WORLD_LOADED, world, Event.Priority.Monitor, this);
 
-        pm.registerEvent( Event.Type.ENTITY_DAMAGEDBY_BLOCK, entity, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.ENTITY_DAMAGEDBY_ENTITY, entity, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.ENTITY_DAMAGEDBY_PROJECTILE, entity, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.ENTITY_DAMAGED, entity, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.ENTITY_DEATH, entity, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.ENTITY_COMBUST, entity, Event.Priority.Monitor, this);
@@ -274,9 +266,6 @@ class TestEntityListener extends EntityListener {
         this.plugin = plugin;
     }
 
-    @Override public void onEntityDamageByBlock(EntityDamageByBlockEvent event) { plugin.recordEvent(event); }
-    @Override public void onEntityDamageByEntity(EntityDamageByEntityEvent event) { plugin.recordEvent(event); }
-    @Override public void onEntityDamageByProjectile(EntityDamageByProjectileEvent event) { plugin.recordEvent(event); }
     @Override public void onEntityCombust(EntityCombustEvent event) { plugin.recordEvent(event); }
     @Override public void onEntityDamage(EntityDamageEvent event) { plugin.recordEvent(event); }
     @Override public void onEntityExplode(EntityExplodeEvent event) { plugin.recordEvent(event); }
