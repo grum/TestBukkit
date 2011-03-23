@@ -1,6 +1,5 @@
 package nl.grum.bukkit.dev;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,14 +9,12 @@ import net.minecraft.server.Packet15Place;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.entity.CraftItem;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.craftbukkit.inventory.CraftItemStack;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.event.block.*;
@@ -26,8 +23,6 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.server.*;
 import org.bukkit.event.vehicle.*;
 import org.bukkit.event.world.*;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -52,6 +47,15 @@ public class TestBukkit extends JavaPlugin {
         String commandName = command.getName().toLowerCase();
 
         if (commandName.equals("test")) {
+            /*
+            player.sendMessage("\u00A7alooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong");
+            player.sendRawMessage("\u00A7alooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong");
+            player.sendMessage("\u00A7alooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong\u00A7");
+            player.sendRawMessage("\u00A7alooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong\u00A7");
+            */
+
+            /*
+             */
 
             // Block Test
             PluginManager pm = getServer().getPluginManager();
@@ -108,7 +112,13 @@ public class TestBukkit extends JavaPlugin {
                 return String.format("BlockFromTo{from=%s,to=%s}", fromBlock, myToString(event.getToBlock()));
             } else if (object instanceof BlockPlaceEvent) {
                 BlockPlaceEvent event = (BlockPlaceEvent) object;
-                return String.format("BlockPlace{player=%s,block=%s,old=%s}", myToString(event.getPlayer()), myToString(event.getBlock()), myToString(event.getBlockReplacedState().getType()));
+                String loc = String.format(
+                    "[%d,%d,%d]",
+                    event.getBlockAgainst().getLocation().getBlockX(),
+                    event.getBlockAgainst().getLocation().getBlockY(),
+                    event.getBlockAgainst().getLocation().getBlockZ()
+                );
+                return String.format("BlockPlace{player=%s,clicked=%s,old=%s,placed=%s}", myToString(event.getPlayer()), loc, myToString(event.getBlockReplacedState().getType()), myToString(event.getBlock()));
             } else if (object instanceof BlockCanBuildEvent) {
                 BlockCanBuildEvent event = (BlockCanBuildEvent) object;
                 return String.format("BlockCanBuild{block=%s,new-material=%s}", myToString(event.getBlock()), myToString(event.getMaterial()));
@@ -124,9 +134,15 @@ public class TestBukkit extends JavaPlugin {
             } else if (object instanceof EntityDamageEvent) {
                 EntityDamageEvent event = (EntityDamageEvent) object;
                 return String.format("EntityDamage{entity=%s,damage=%d,cause=%s}", myToString(event.getEntity()), event.getDamage(), event.getCause());
-            } else if (object instanceof BlockRightClickEvent) {
-                BlockRightClickEvent event = (BlockRightClickEvent) object;
-                return String.format("BlockRightClick{player=%s,block=%s,face=%s}", myToString(event.getPlayer()), myToString(event.getBlock()), event.getDirection());
+            } else if (object instanceof BlockRedstoneEvent) {
+                BlockRedstoneEvent event = (BlockRedstoneEvent) object;
+                return String.format("BlockRedstone{block=%s,from=%d,to=%d}", myToString(event.getBlock()), event.getOldCurrent(), event.getNewCurrent());
+            } else if (object instanceof PlayerInteractEvent) {
+                PlayerInteractEvent event = (PlayerInteractEvent) object;
+                return String.format("PlayerInteract{player=%s,action=%s,block=%s,item=%s}", myToString(event.getPlayer()), myToString(event.getAction()), myToString(event.getClickedBlock()), myToString(event.getItem()));
+            } else if (object instanceof PlayerItemEvent) {
+                PlayerItemEvent event = (PlayerItemEvent) object;
+                return String.format("PlayerItem{player=%s,item=%s,block=%s,face=%s}", myToString(event.getPlayer()), myToString(event.getItem()), myToString(event.getBlockClicked()), event.getBlockFace());
             } else if (object instanceof PlayerPickupItemEvent) {
                 PlayerPickupItemEvent event = (PlayerPickupItemEvent) object;
                 return String.format("PlayerPickupItem{player=%s,item=%s}", myToString(event.getPlayer()), myToString(event.getItem()));
@@ -136,6 +152,12 @@ public class TestBukkit extends JavaPlugin {
             } else if (object instanceof PlayerDropItemEvent) {
                 PlayerDropItemEvent event = (PlayerDropItemEvent) object;
                 return String.format("PlayerDropItem{player=%s,item=%s}", myToString(event.getPlayer()), myToString(event.getItemDrop()));
+            } else if (object instanceof PlayerBucketFillEvent) {
+                PlayerBucketFillEvent event = (PlayerBucketFillEvent) object;
+                return String.format("PlayerBucketFill{player=%s,bucket=%s,item=%s,target=%s,face=%s}", myToString(event.getPlayer()), event.getBucket(), myToString(event.getItemStack()), myToString(event.getBlockClicked()), event.getBlockFace());
+            } else if (object instanceof PlayerBucketEmptyEvent) {
+                PlayerBucketEmptyEvent event = (PlayerBucketEmptyEvent) object;
+                return String.format("PlayerBucketEmpty{player=%s,bucket=%s,item=%s,target=%s,face=%s}", myToString(event.getPlayer()), event.getBucket(), myToString(event.getItemStack()), myToString(event.getBlockClicked()), event.getBlockFace());
             } else if (object instanceof BlockDamageEvent) {
                 BlockDamageEvent event = (BlockDamageEvent) object;
                 return String.format("BlockDamage{player=%s,block=%s,level=%s}", myToString(event.getPlayer()), myToString(event.getBlock()), event.getDamageLevel());
@@ -158,8 +180,7 @@ public class TestBukkit extends JavaPlugin {
             Block block = (Block) object;
             return String.format("Block{coords=[%d,%d,%d],type=%s,data=%d}", block.getX(), block.getY(), block.getZ(), myToString(block.getType()), block.getData());
         }
-            
-        return object.toString();
+        return "" + object;
     }
 
     private List<Event> list = new ArrayList<Event>(); 
@@ -182,11 +203,11 @@ public class TestBukkit extends JavaPlugin {
         pm.registerEvent( Event.Type.PLAYER_QUIT, player, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.PLAYER_RESPAWN, player, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.PLAYER_KICK, player, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.PLAYER_COMMAND, player, Event.Priority.Monitor, this);
+        //pm.registerEvent( Event.Type.PLAYER_COMMAND, player, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.PLAYER_CHAT, player, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.PLAYER_MOVE, player, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.PLAYER_TELEPORT, player, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.PLAYER_ITEM, player, Event.Priority.Monitor, this);
+        pm.registerEvent( Event.Type.PLAYER_INTERACT, player, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.PLAYER_LOGIN, player, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.PLAYER_EGG_THROW, player, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.PLAYER_ANIMATION, player, Event.Priority.Monitor, this);
@@ -195,13 +216,13 @@ public class TestBukkit extends JavaPlugin {
         pm.registerEvent( Event.Type.PLAYER_DROP_ITEM, player, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.PLAYER_PICKUP_ITEM, player, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.PLAYER_TOGGLE_SNEAK, player, Event.Priority.Monitor, this);
+        pm.registerEvent( Event.Type.PLAYER_BUCKET_EMPTY, player, Event.Priority.Monitor, this);
+        pm.registerEvent( Event.Type.PLAYER_BUCKET_FILL, player, Event.Priority.Monitor, this);
 
-        //pm.registerEvent( Event.Type.BLOCK_PHYSICS, block, Event.Priority.Monitor, this);
+        // pm.registerEvent( Event.Type.BLOCK_PHYSICS, block, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.BLOCK_CANBUILD, block, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.BLOCK_RIGHTCLICKED, block, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.BLOCK_PLACED, block, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.BLOCK_DAMAGED, block, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.BLOCK_INTERACT, block, Event.Priority.Monitor, this);
+        pm.registerEvent( Event.Type.BLOCK_PLACE, block, Event.Priority.Monitor, this);
+        pm.registerEvent( Event.Type.BLOCK_DAMAGE, block, Event.Priority.Monitor, this);
         //pm.registerEvent( Event.Type.BLOCK_FLOW, block, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.LEAVES_DECAY, block, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.SIGN_CHANGE, block, Event.Priority.Monitor, this);
@@ -214,16 +235,19 @@ public class TestBukkit extends JavaPlugin {
         pm.registerEvent( Event.Type.PLUGIN_DISABLE, server, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.SERVER_COMMAND, server, Event.Priority.Monitor, this);
 
-        pm.registerEvent( Event.Type.CHUNK_LOADED, world, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.CHUNK_UNLOADED, world, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.WORLD_SAVED, world, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.WORLD_LOADED, world, Event.Priority.Monitor, this);
+        pm.registerEvent( Event.Type.CHUNK_LOAD, world, Event.Priority.Monitor, this);
+        pm.registerEvent( Event.Type.CHUNK_UNLOAD, world, Event.Priority.Monitor, this);
+        pm.registerEvent( Event.Type.WORLD_SAVE, world, Event.Priority.Monitor, this);
+        pm.registerEvent( Event.Type.WORLD_LOAD, world, Event.Priority.Monitor, this);
 
-        pm.registerEvent( Event.Type.ENTITY_DAMAGED, entity, Event.Priority.Monitor, this);
+        //pm.registerEvent( Event.Type.ENTITY_DAMAGEDBY_BLOCK, entity, Event.Priority.Monitor, this);
+        //pm.registerEvent( Event.Type.ENTITY_DAMAGEDBY_ENTITY, entity, Event.Priority.Monitor, this);
+        //pm.registerEvent( Event.Type.ENTITY_DAMAGEDBY_PROJECTILE, entity, Event.Priority.Monitor, this);
+        pm.registerEvent( Event.Type.ENTITY_DAMAGE, entity, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.ENTITY_DEATH, entity, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.ENTITY_COMBUST, entity, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.ENTITY_EXPLODE, entity, Event.Priority.Monitor, this);
-        pm.registerEvent( Event.Type.EXPLOSION_PRIMED, entity, Event.Priority.Monitor, this);
+        pm.registerEvent( Event.Type.EXPLOSION_PRIME, entity, Event.Priority.Monitor, this);
         pm.registerEvent( Event.Type.ENTITY_TARGET, entity, Event.Priority.Monitor, this);
 
         pm.registerEvent( Event.Type.VEHICLE_CREATE, vehicle, Event.Priority.Monitor, this);
@@ -250,8 +274,6 @@ class TestBlockListener extends BlockListener {
     @Override public void onBlockIgnite(BlockIgniteEvent event) { plugin.recordEvent(event); }
     @Override public void onBlockPhysics(BlockPhysicsEvent event) { plugin.recordEvent(event); }
     @Override public void onBlockPlace(BlockPlaceEvent event) { plugin.recordEvent(event); }
-    @Override public void onBlockInteract(BlockInteractEvent event) { plugin.recordEvent(event); }
-    @Override public void onBlockRightClick(BlockRightClickEvent event) { plugin.recordEvent(event); }
     @Override public void onBlockRedstoneChange(BlockRedstoneEvent event) { plugin.recordEvent(event); }
     @Override public void onLeavesDecay(LeavesDecayEvent event) { plugin.recordEvent(event); }
     @Override public void onSignChange(SignChangeEvent event) { plugin.recordEvent(event); }
@@ -269,27 +291,30 @@ class TestEntityListener extends EntityListener {
     @Override public void onEntityCombust(EntityCombustEvent event) { plugin.recordEvent(event); }
     @Override public void onEntityDamage(EntityDamageEvent event) { plugin.recordEvent(event); }
     @Override public void onEntityExplode(EntityExplodeEvent event) { plugin.recordEvent(event); }
-    @Override public void onExplosionPrimed(ExplosionPrimedEvent event) { plugin.recordEvent(event); }
+    @Override public void onExplosionPrime(ExplosionPrimeEvent event) { plugin.recordEvent(event); }
     @Override public void onEntityDeath(EntityDeathEvent event) { plugin.recordEvent(event); }
     @Override public void onEntityTarget(EntityTargetEvent event) { plugin.recordEvent(event); }
 }
 
 class TestPlayerListener extends PlayerListener {
+
     private TestBukkit plugin;
 
     public TestPlayerListener( TestBukkit plugin ) {
         this.plugin = plugin;
     }
 
+    @Override public void onPlayerBucketFill(PlayerBucketFillEvent event) { plugin.recordEvent(event); }
+    @Override public void onPlayerBucketEmpty(PlayerBucketEmptyEvent event) { plugin.recordEvent(event); }
     @Override public void onPlayerJoin(PlayerEvent event) { plugin.recordEvent(event); }
     @Override public void onPlayerQuit(PlayerEvent event) { plugin.recordEvent(event); }
     @Override public void onPlayerKick(PlayerKickEvent event) { plugin.recordEvent(event); }
     @Override public void onPlayerChat(PlayerChatEvent event) { plugin.recordEvent(event); }
-    @Override public void onPlayerCommand(PlayerChatEvent event) { plugin.recordEvent(event); }
+    //@Override public void onPlayerCommand(PlayerChatEvent event) { plugin.recordEvent(event); }
     @Override public void onPlayerMove(PlayerMoveEvent event) { plugin.recordEvent(event); }
     @Override public void onPlayerTeleport(PlayerMoveEvent event) { plugin.recordEvent(event); }
     @Override public void onPlayerRespawn(PlayerRespawnEvent event) { plugin.recordEvent(event); }
-    @Override public void onPlayerItem(PlayerItemEvent event) { plugin.recordEvent(event); }
+    @Override public void onPlayerInteract(PlayerInteractEvent event) { plugin.recordEvent(event); }
     @Override public void onPlayerLogin(PlayerLoginEvent event) { plugin.recordEvent(event); }
     @Override public void onPlayerEggThrow(PlayerEggThrowEvent event) { plugin.recordEvent(event); }
     @Override public void onPlayerAnimation(PlayerAnimationEvent event) { plugin.recordEvent(event); }
@@ -307,8 +332,8 @@ class TestServerListener extends ServerListener {
         this.plugin = plugin;
     }
 
-    @Override public void onPluginEnabled(PluginEvent event) { plugin.recordEvent(event); }
-    @Override public void onPluginDisabled(PluginEvent event) { plugin.recordEvent(event); }
+    @Override public void onPluginEnable(PluginEvent event) { plugin.recordEvent(event); }
+    @Override public void onPluginDisable(PluginEvent event) { plugin.recordEvent(event); }
     @Override public void onServerCommand(ServerCommandEvent event) { plugin.recordEvent(event); }
 }
 
@@ -336,8 +361,8 @@ class TestWorldListener extends WorldListener {
         this.plugin = plugin;
     }
 
-    @Override public void onChunkLoaded(ChunkLoadEvent event) { plugin.recordEvent(event); }
-    @Override public void onChunkUnloaded(ChunkUnloadEvent event) { plugin.recordEvent(event); }
-    @Override public void onWorldSaved(WorldEvent event) { plugin.recordEvent(event); }
-    @Override public void onWorldLoaded(WorldEvent event) { plugin.recordEvent(event); }
+    @Override public void onChunkLoad(ChunkLoadEvent event) { plugin.recordEvent(event); }
+    @Override public void onChunkUnload(ChunkUnloadEvent event) { plugin.recordEvent(event); }
+    @Override public void onWorldSave(WorldEvent event) { plugin.recordEvent(event); }
+    @Override public void onWorldLoad(WorldEvent event) { plugin.recordEvent(event); }
 }
